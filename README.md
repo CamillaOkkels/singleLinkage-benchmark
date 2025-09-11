@@ -12,3 +12,12 @@ Approximate implementations (these do not guarantee exact clustering results), s
 - [HNSWmst]: An algorithm computing the minimum spanning tree on all edges in the HNSW graph.
 - [HNSWkruskal]: An algorithm simulating running Kruskal's algorithm on the complete graph induced by the dataset.
 - [HNSWhssl]: An approximate single-link algorithm using incremental Heap of Searchers on an HNSW graph.
+
+## Supported datasets
+
+| Dataset    | Size (* --> max. sampling size)     | Min. sampling size | Dimensions |
+|------------|-----------|------------|-----------|
+| MNIST      | 70,000    | 10,000     | 784       |
+| Aloi       | 110,249   | 50,000     | 63        |
+| Census*    | 250,000   | 50,000     | 500       | 
+| Celeba     | 202,599   | 50,000     | 39        |
