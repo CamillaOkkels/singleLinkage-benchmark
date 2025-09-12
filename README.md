@@ -60,4 +60,23 @@ After running the experiments, make sure to fix the file permissions by running 
 ```
 sudo chmod -R 777 results/
 ```
+## Algorithm configuration
 
+Algorithm configurations are stored in YAML files. The are available in `benchmark/algorithms/<ALGORITHM>/config.yml.`
+
+An example looks like this:
+
+```yaml
+docker-image: dbscan-benchmarks-HNSWhssl
+module: HNSWhssl
+constructor: HNSWSingleLinkage
+name: HNSWhssl
+args:
+  - [5, 11, 22, 47, 100] # ef *(efS)*
+  - [25, 42, 71, 119, 200] # max_build_heap_size *(efC)*
+  - [10, 14, 19, 26, 37, 51, 72, 100] # lowest_max_degree *(M)*
+```
+
+The `args` part specifies all the experiments that are going to be run. 
+The Cartesian product of all the given lists is making up the list of individual runs that are tried out in the experiment. (In the example, 5 * 5 * 8 runs are conducted).
+`args` have to match the number of arguments expected by the constructor. 
