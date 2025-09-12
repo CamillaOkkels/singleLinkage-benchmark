@@ -21,3 +21,43 @@ Approximate implementations (these do not guarantee exact clustering results), s
 | Aloi       | 110,249   | 50,000     | 63        |
 | Census*    | 250,000   | 50,000     | 500       | 
 | Celeba     | 202,599   | 50,000     | 39        |
+
+# HOWTO 
+
+## Installation
+
+Algorithms are carried out in Docker containers, which means that you will need a running docker installation. See for example [this website](https://www.digitalocean.com/community/tutorial-collections/how-to-install-and-use-docker) to get started.
+
+Assuming you have Python version >= 3.8 installed, run
+
+```bash
+python3 -m pip install -r requirements.txt 
+```
+
+to install all necessary packages. Starting in a fresh python environment is suggested. 
+
+All implementations can be installed using
+```bash
+python3 install.py
+```
+
+# Running an experiment
+
+The standard way to run an experiment is
+
+```
+python3 run.py --dataset <DATASET> --algorithm <ALGORITHM> 
+```
+
+This will run all configurations known for algorithm on the dataset. The benchmark also allows to run multiple runs with the same parameter settings as well as whether or not existing results should be overwritten or not. This is done by adding -- run <RUN NUMBER> (-r <RUN NUMBER>, default -> 1) and --overwrite <boolean> (-o <boolean>, default -> true). An example could be:
+
+```
+python3 run.py --dataset mnist --algorithm HNSWhssl -r 5 -o true
+```
+
+After running the experiments, make sure to fix the file permissions by running something like 
+
+```
+sudo chmod -R 777 results/
+```
+
