@@ -6,7 +6,7 @@ We currently support the following implementations:
 
 Exact implementations: 
 - [SciPy's Single-Linkage](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.single.html): the popular Single-Linkage implementation in SciPy.
-- [VPTreeJava](https://github.com/elki-project/elki/blob/550de994d477ce25b696192f142dfc03e094fa24/elki-clustering/src/main/java/elki/clustering/hierarchical/HeapOfSearchersSingleLink.java#L143): A single-linkage implementation in ELKI using Vantage-Point trees, see [Erich](https://link.springer.com/chapter/10.1007/978-3-031-75823-2_20)
+- [VPTreeJava](https://github.com/elki-project/elki/blob/550de994d477ce25b696192f142dfc03e094fa24/elki-clustering/src/main/java/elki/clustering/hierarchical/HeapOfSearchersSingleLink.java#L143): A single-linkage implementation in ELKI using Vantage-Point trees, see this paper by [Erich Schubert](https://link.springer.com/chapter/10.1007/978-3-031-75823-2_20)
 
 Approximate implementations (these do not guarantee exact clustering results), see [Okkels et al.](https://link.springer.com/chapter/10.1007/978-3-032-06069-3_19?fbclid=IwY2xjawNTD-5leHRuA2FlbQIxMABicmlkETB3SmpYbW1Oa05lVTNYRDlLAR4-bZwl1lfu_SfbDis6F1kOr21S5bZBoAw-Ttl99jKcGXkSQxf6LU4f2Yp0vQ_aem_Ts4he6Ug4XJa_tEmEFT6Cg) for further details, and see [HSSL](https://github.com/CamillaOkkels/HSSL/tree/main) for the source code:
 - [HNSWmst]: An algorithm computing the minimum spanning tree on all edges in the HNSW graph.
