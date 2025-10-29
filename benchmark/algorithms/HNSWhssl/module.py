@@ -4,8 +4,8 @@ import json
 from benchmark.algorithms.default_hnsw_params import DEFAULT_PARAMS
 
 # Only for the server!!!
-try: gib.limit_threads(50)
-except: pass
+# try: gib.limit_threads(50)
+# except: pass
 
 class HNSWSingleLinkage(BaseClustering):
     def __init__(self, ef, max_build_heap_size, lowest_max_degree):

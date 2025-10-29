@@ -2,13 +2,13 @@ from benchmark.algorithms.base.module import BaseClustering
 from HSSL import *
 import numpy as np
 import json
-import graphidxbaselines as gib
+# import graphidxbaselines as gib
 import hnswhsslrust as hrr
 from benchmark.algorithms.default_hnsw_params import DEFAULT_PARAMS
 
 # Only for the server!!!
-try: gib.limit_threads(50)
-except: pass
+# try: gib.limit_threads(50)
+# except: pass
 
 class HNSWmst(BaseClustering):
     def __init__(self, minPts, symmetric_expand, max_build_heap_size, lowest_max_degree):
