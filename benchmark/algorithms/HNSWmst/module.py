@@ -3,6 +3,7 @@ from HSSL import *
 import numpy as np
 import json
 import graphidxbaselines as gib
+import hnswhsslrust as hrr
 from benchmark.algorithms.default_hnsw_params import DEFAULT_PARAMS
 
 # Only for the server!!!
@@ -19,7 +20,7 @@ class HNSWmst(BaseClustering):
         self.minPts = minPts
 
     def cluster(self, X: np.array):
-        self.dendrogram = gib.graph_based_dendrogram(
+        self.dendrogram = hrr.graph_based_dendrogram(
             X,
             min_pts = self.minPts,
             expand=False,

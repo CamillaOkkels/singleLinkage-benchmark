@@ -203,32 +203,25 @@ def household():
         write_output(X, "household")
 
 
-def aloi(sample_size=None, seed=None):
+# def aloi(sample_size=None, seed=None):
     
-    if sample_size is not None:
-        name = f"aloi-{sample_size//1_000}k"
-    else:
-        name = "aloi"
+#     if sample_size is not None:
+#         name = f"aloi-{sample_size//1_000}k"
+#     else:
+#         name = "aloi"
     
-    if os.path.exists(get_dataset_fn(name)):    
-        return
+#     if os.path.exists(get_dataset_fn(name)):    
+#         return
     
-    src = "https://github.com/Minqi824/ADBench/raw/main/adbench/datasets/Classical/1_ALOI.npz"
-    download(src, "aloi.npz")
-    X = np.load("aloi.npz")['X']
-    X = X.astype(np.float32)
+#     src = "https://github.com/Minqi824/ADBench/raw/main/adbench/datasets/Classical/1_ALOI.npz"
+#     download(src, "aloi.npz")
+#     X = np.load("aloi.npz")['X']
+#     X = X.astype(np.float32)
     
-    if sample_size is None: sample_size = X.shape[0]
-    X = sample(X, sample_size, seed=seed)
+#     if sample_size is None: sample_size = X.shape[0]
+#     X = sample(X, sample_size, seed=seed)
 
-    write_output(X, name)
-
-
-def aloi77():
-    name = "aloi-colorsim77"
-    
-    if os.path.exists(get_dataset_fn(name)):    
-        return
+#     write_output(X, name)
 
 
 def aloi733(sample_size=None, seed=None):
@@ -343,18 +336,18 @@ DATASETS = {
         }
         for i in [12, 15, 19, 24, 29, 37, 45, 56]
     },
-    **{
-        f'aloi-{i}k': {
-            'prepare': (lambda i: (lambda: aloi(i*1_000, seed=0)))(i),
-        }
-        for i in (1+np.arange(11))*10
-    },
-    **{
-        f'aloi-{i}k': {
-            'prepare': (lambda i: (lambda: aloi(i*1_000, seed=0)))(i),
-        }
-        for i in [11, 13, 15, 16, 17, 23, 25, 27, 32, 33]
-    },
+    # **{
+    #     f'aloi-{i}k': {
+    #         'prepare': (lambda i: (lambda: aloi(i*1_000, seed=0)))(i),
+    #     }
+    #     for i in (1+np.arange(11))*10
+    # },
+    # **{
+    #     f'aloi-{i}k': {
+    #         'prepare': (lambda i: (lambda: aloi(i*1_000, seed=0)))(i),
+    #     }
+    #     for i in [11, 13, 15, 16, 17, 23, 25, 27, 32, 33]
+    # },
     **{
         f'aloi733-{i}k': {
             'prepare': (lambda i: (lambda: aloi733(i*1_000, seed=10)))(i),
@@ -400,10 +393,10 @@ DATASETS = {
     'pamap2-full': {
         'prepare': lambda: pamap2(False),
     },
-    **{
-        f.__name__: {'prepare': f}
-        for f in [mnist, aloi, household, census, celeba]
-    },
+    # **{
+    #     f.__name__: {'prepare': f}
+    #     for f in [mnist, aloi, household, census, celeba]
+    # },
     **{
         f'blobs-{i}k-{dim}-{centers}': {
             'prepare': (lambda i, dim, centers: (lambda: blobs(i*1_000, dim, centers)))(i, dim, centers),

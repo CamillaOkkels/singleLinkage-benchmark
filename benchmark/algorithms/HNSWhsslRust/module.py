@@ -2,7 +2,7 @@ from benchmark.algorithms.base.module import BaseClustering
 from HSSL import *
 import numpy as np
 import json
-import graphidxbaselines as gib
+import hnswhsslrust as hhr
 from benchmark.algorithms.default_hnsw_params import DEFAULT_PARAMS
 
 class HNSWSingleLinkageRust(BaseClustering):
@@ -15,7 +15,7 @@ class HNSWSingleLinkageRust(BaseClustering):
         pass
 
     def cluster(self, X: np.array):  
-        self.dendrogram = gib.hnsw_hssl(
+        self.dendrogram = hhr.hnsw_hssl(
             X, 
             ef = self.ef, 
             **self.params,
