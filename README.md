@@ -49,7 +49,7 @@ The standard way to run an experiment is
 python3 run.py --dataset <DATASET> --algorithm <ALGORITHM> 
 ```
 
-This will run all configurations known for algorithm on the dataset. The benchmark also allows saving runs with the same parameter settings separately, giving them individual run numbers, as well as deciding whether or not existing results should be overwritten or not. This is done by adding -- run <RUN NUMBER> (-r <RUN NUMBER>, default --> 1) and --overwrite <boolean> (-o <boolean>, default --> true). An example could be:
+This will run all configurations known for algorithm on the dataset. The benchmark also allows saving multiple runs with the same parameter settings separately, giving them individual run numbers, as well as deciding whether or not existing results should be overwritten or not. This is done by adding -- run <RUN NUMBER> (-r <RUN NUMBER>, default --> 1) and --overwrite <boolean> (-o <boolean>, default --> true). An example could be:
 
 ```
 python3 run.py --dataset mnist --algorithm HNSWhssl -r 5 -o true
