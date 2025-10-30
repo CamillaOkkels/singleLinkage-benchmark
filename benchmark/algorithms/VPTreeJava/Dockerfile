@@ -1,4 +1,2 @@
-FROM singleLinkage-benchmark
+FROM singlelinkage-benchmark
 
-RUN pip install time
-RUN pip install json

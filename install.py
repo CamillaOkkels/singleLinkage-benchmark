@@ -13,7 +13,7 @@ def build(library, args):
 
     try:
         subprocess.check_call(
-            "docker build %s --rm -t singleLinkage-benchmarks-%s -f" " benchmark/algorithms/%s/Dockerfile  ." % (q, library.lower(), library),
+            "docker build %s --rm -t singlelinkage-benchmarks-%s -f" " benchmark/algorithms/%s/Dockerfile  ." % (q, library.lower(), library),
             shell=True,
         )
         return {library: "success"}
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("Building base image...")
     subprocess.check_call(
          "docker build \
-         --rm -t singleLinkage-benchmark -f benchmark/algorithms/base/Dockerfile .",
+         --rm -t singlelinkage-benchmark -f benchmark/algorithms/base/Dockerfile .",
          shell=True,
      )
 

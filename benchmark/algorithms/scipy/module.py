@@ -1,6 +1,5 @@
 from benchmark.algorithms.base.module import BaseClustering
 import scipy
-
 import numpy as np
 
 class SciPySingleLinkage(BaseClustering):

@@ -1,3 +1,2 @@
-FROM singleLinkage-benchmark
+FROM singlelinkage-benchmark
 
-RUN pip install json
