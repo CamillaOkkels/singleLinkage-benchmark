@@ -5,7 +5,7 @@ import multiprocessing.pool
 import os
 import threading
 import json
-
+import docker
 
 from typing import List
 
@@ -22,6 +22,54 @@ def run_experiment(X: np.array, algo: BaseClustering):
     end_proc = time.process_time()
     return end - start - algo.get_overhead_time(), end_proc - start_proc - algo.get_overhead_time(), algo.retrieve_dendrogram(), algo.retrieve_milestones()
 
+def run_docker(dataset: str, eps: float, minPts: int, definition: Definition) -> None:
+    cmd = [
+        "--dataset",
+        dataset,
+        "--algorithm",
+       definition.algorithm,
+        "--eps",
+        eps,
+        "--minPts",
+        minPts,
+        "--nodocker",
+        "--arguments",
+        "\"" + json.dumps(definition.arguments) + "\""
+    ]
+
+    print(f"Running {definition.algorithm} in container {definition.docker_tag}")
+    print(" ".join(map(str, cmd)))
+
+    client = docker.from_env()
+    container = client.containers.run(
+       definition.docker_tag,
+        " ".join(map(str, cmd)),
+        volumes={
+            os.path.abspath("benchmark"): {"bind": "/home/app/benchmark", "mode": "ro"},
+            os.path.abspath("data"): {"bind": "/home/app/data", "mode": "ro"},
+            os.path.abspath("results"): {"bind": "/home/app/results", "mode": "rw"},
+        },
+        mem_limit=int(100*1e9),
+        mem_swappiness=0,
+        detach=True
+    )
+
+    def stream_logs():
+        for line in container.logs(stream=True):
+            print(line.decode().rstrip())
+
+    t = threading.Thread(target=stream_logs, daemon=True)
+    t.start()
+
+    try:
+        container.wait(timeout=36000)
+    except Exception as e:
+        print("Container.wait for container %s failed with exception", container.short_id)
+        print(str(e))
+    finally:
+        print("Removing container")
+        container.remove(force=True)
+
 
 # def run_worker(dataset: str, queue: multiprocessing.Queue) -> None:
 def run_worker(dataset: str, definition: Definition, n_run: int, overwrite: bool = True) -> None:
@@ -36,6 +84,30 @@ def run_worker(dataset: str, definition: Definition, n_run: int, overwrite: bool
         # definition = queue.get()
 
     time, time_proc, dendrogram, milestones = run_experiment(X, runner)
+    attrs = {
+        "time": time,
+        "time_proc": time_proc,
+        "ds": dataset,
+        "run": n_run,
+        "algo": definition.algorithm,
+        "params": str(runner)
+    }
+    attrs.update(runner.get_additional())
+    store_results(dataset, definition.algorithm, n_run, 
+                    repr(runner), attrs, dendrogram, milestones)
+
+def run_worker_docker(dataset: str, definition: Definition, n_run: int, overwrite: bool = True) -> None:
+    runner = instantiate_algorithm(definition)
+
+    # Immediately return iff file exists and the overwrite flag is false
+    if not overwrite and test_result_exists(dataset, definition.algorithm, repr(runner)): return
+
+    X = get_dataset(dataset)
+    X = np.array(X["data"])
+    # while not queue.empty():
+        # definition = queue.get()
+
+    time, time_proc, dendrogram, milestones = run_docker(X, runner)
     attrs = {
         "time": time,
         "time_proc": time_proc,
@@ -122,6 +194,79 @@ def create_workers_and_execute(dataset: str, definitions: List[Definition], n_ru
         pool.map(pool_worker, definitions)
         pool.close()
 
+def create_workers_and_execute_docker(dataset: str, definitions: List[Definition], n_run=1, n_procs=1, overwrite=True) -> None:
+    """
+    Manages the creation, execution, and termination of worker processes based on provided arguments.
+
+    Args:
+        definitions (List[Definition]): List of algorithm definitions to be processed.
+        args (argparse.Namespace): User provided arguments for running workers.
+
+    Raises:
+        Exception: If the level of parallelism exceeds the available CPU count or if batch mode is on with more than
+                   one worker.
+    """
+    #cpu_count = multiprocessing.cpu_count()
+    #if args.parallelism > cpu_count - 1:
+    #    raise Exception(f"Parallelism larger than {cpu_count - 1}! (CPU count minus one)")
+
+    # if args.batch and args.parallelism > 1:
+    #     raise Exception(
+    #         f"Batch mode uses all available CPU resources, --parallelism should be set to 1. (Was: {args.parallelism})"
+    #     )
+    
+    cpu_count = multiprocessing.cpu_count()
+    if n_procs > cpu_count - 1:
+       raise Exception(f"Parallelism larger than {cpu_count - 1}! (CPU count minus one)")
+
+    timeout_hours = 10
+    timeout_seconds = timeout_hours * 3600
+
+    if n_procs == 1:
+        # task_queue = multiprocessing.Queue()
+        for run in definitions:
+            # task_queue.put(run)
+
+            try:
+                workers = [multiprocessing.Process(target=run_worker_docker, args=(dataset, run), kwargs=dict(n_run=n_run, overwrite=overwrite))]
+                [worker.start() for worker in workers]
+                [worker.join(timeout=timeout_seconds) for worker in workers] # Timeout of 10 hours
+
+                for worker in workers:
+                    if worker.is_alive():
+                        print("Timeout reached. Terminating worker...")
+                        worker.terminate()
+                        worker.join()
+                    else:
+                        print("Worker completed within time.")
+            finally:
+                print("Terminating %d workers" % len(workers))
+                [worker.terminate() for worker in workers]
+    else:
+        # Encapsulate the above code in a "nicer" way for a thread worker
+        def pool_worker(run):
+            try:
+                worker = multiprocessing.Process(target=run_worker_docker, args=(dataset, run), kwargs=dict(n_run=n_run, overwrite=overwrite))
+                worker.start()
+                worker.join(timeout=timeout_seconds) # Timeout of 10 hours
+                if worker.is_alive(): raise TimeoutError()
+                print("Worker completed within time.")
+            except Exception as e:
+                if worker.is_alive():
+                    print("Timeout reached. Terminating worker...")
+                    worker.terminate()
+                    if worker.is_alive():
+                        kill_result = os.system(f"kill {worker.pid}")
+                        if kill_result: print(f"Warning: Failed to kill child process {worker.pid}")
+                    else: worker.join()
+                if type(e) != TimeoutError:
+                    import traceback
+                    traceback.print_exception(e)
+        # Use a thread pool to have a managed number of executions running at any one time
+        pool = multiprocessing.pool.ThreadPool(n_procs)
+        pool.map(pool_worker, definitions)
+        pool.close()
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -131,7 +276,7 @@ def main():
         '--dataset',
         metavar='NAME',
         help='the dataset to cluster',
-        default='mnist',
+        default='mnist-8k',
         choices=DATASETS.keys()
     )
 
@@ -174,6 +319,12 @@ def main():
         help="the number of processes to use for experiments",
     )
 
+    parser.add_argument(
+        '--nodocker',
+        action='store_true',
+        help='run algorithm locally'
+    )
+
     args = parser.parse_args()
 
 
@@ -196,4 +347,7 @@ def main():
     if args.prepare:
         exit(0)
 
-    create_workers_and_execute(args.dataset, definitions, n_run=args.run, n_procs=args.procs, overwrite=args.overwrite)
+    if args.nodocker:
+        create_workers_and_execute(args.dataset, definitions, n_run=args.run, n_procs=args.procs, overwrite=args.overwrite)
+    else:
+        create_workers_and_execute_docker(args.dataset, definitions, n_run=args.run, n_procs=args.procs, overwrite=args.overwrite)

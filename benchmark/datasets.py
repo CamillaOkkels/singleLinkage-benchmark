@@ -142,7 +142,7 @@ def mnist(sample_size=None, seed=None):
     if sample_size is None: sample_size = X.shape[0]
     X = sample(X, sample_size, seed=seed)
 
-    write_output(X, name, y)
+    write_output(X, name, None)
 
 
 def pamap2(apply_pca=False, sample_size=None, seed=None):

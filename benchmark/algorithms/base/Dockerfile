@@ -43,7 +43,10 @@ RUN rm -rf HSSL GraphIndexAPI && \
 # Python application
 # -----------------------------
 WORKDIR /home/app
-COPY requirements.txt run.py ./
+COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["python", "-u", "run.py"]
+ENV PYTHONPATH=/opt/build/HSSL
+
+ENTRYPOINT ["/opt/venv/bin/python", "-u"]
+CMD ["run.py"]
