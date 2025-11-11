@@ -1,9 +1,11 @@
-h5py==3.8.0
-scikit-learn==1.2.1
+h5py
+scikit-learn
 pyyaml
-numpy==1.26.4
+numpy
 hdbscan
 docker
 matplotlib
+pandas
 plotly
 tqdm
+more_itertools
